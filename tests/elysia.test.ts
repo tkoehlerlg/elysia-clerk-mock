@@ -71,6 +71,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		expect(response.status).toBe(200);
 		expect(response.data?.userId).toBe("user_admin");
 		expect(response.data?.orgId).toBe("org_admin");
+		expect(response.data?.orgRole).toBe("org:admin");
 		expect(response.data?.sessionClaims?.roles).toContain("org:admin");
 	});
 
@@ -93,6 +94,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		expect(response.status).toBe(200);
 		expect(response.data?.userId).toBe("user_regular");
 		expect(response.data?.orgId).toBe("org_regular");
+		expect(response.data?.orgRole).toBe("org:member");
 		expect(response.data?.sessionClaims?.roles).toContain("org:member");
 	});
 
@@ -474,6 +476,50 @@ describe("Elysia Clerk Mock Tests", () => {
 		expect(secondOrgResponse.data?.orgId).toBe("org_second"); // Different org
 		expect(secondOrgResponse.data?.orgRole).toBe("member");
 		expect(secondOrgResponse.data?.orgSlug).toBe("second-org");
+	});
+
+	it("should properly structure the SignedOutAuthObject when unauthenticated", () => {
+		// Set as unauthenticated
+		clerkMock.mockUnauthenticated();
+
+		// Get the auth object
+		const authObject = clerkMock.getUser();
+
+		// Check all required properties for a SignedOutAuthObject
+		expect(authObject.userId).toBeNull();
+		expect(authObject.orgId).toBeNull();
+		expect(authObject.sessionClaims).toBeNull();
+		expect(authObject.sessionId).toBeNull();
+		expect(authObject.actor).toBeNull();
+		expect(authObject.orgRole).toBeNull();
+		expect(authObject.orgSlug).toBeNull();
+		expect(authObject.orgPermissions).toBeNull();
+		expect(authObject.factorVerificationAge).toBeNull();
+
+		// Check functions exist
+		expect(typeof authObject.getToken).toBe("function");
+		expect(typeof authObject.has).toBe("function");
+		expect(typeof authObject.debug).toBe("function");
+	});
+
+	it("should set orgRole correctly for different user types", () => {
+		// Test admin user
+		clerkMock.mockAdmin();
+		let authObject = clerkMock.getUser();
+		expect(authObject.orgRole).toBe("org:admin");
+		expect(authObject.sessionClaims.roles).toContain("org:admin");
+
+		// Test regular user
+		clerkMock.mockUser();
+		authObject = clerkMock.getUser();
+		expect(authObject.orgRole).toBe("org:member");
+		expect(authObject.sessionClaims.roles).toContain("org:member");
+
+		// Test unauthenticated user
+		clerkMock.mockUnauthenticated();
+		authObject = clerkMock.getUser();
+		expect(authObject.orgRole).toBeNull();
+		expect(authObject.sessionClaims).toBeNull();
 	});
 
 	it("should handle actor impersonation", async () => {

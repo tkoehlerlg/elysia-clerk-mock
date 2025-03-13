@@ -46,6 +46,7 @@ class ElysiaClerkMock {
 		this.setUser({
 			userId: "user_admin",
 			orgId: "org_admin",
+			orgRole: "org:admin",
 			sessionClaims: {
 				__raw: "",
 				sub: "user_admin",
@@ -68,6 +69,7 @@ class ElysiaClerkMock {
 		this.setUser({
 			userId: "user_regular",
 			orgId: "org_regular",
+			orgRole: "org:member",
 			sessionClaims: {
 				__raw: "",
 				sub: "user_regular",
@@ -87,20 +89,20 @@ class ElysiaClerkMock {
 	 * Set the mock user to an unauthenticated state
 	 */
 	mockUnauthenticated() {
-		this.setUser({
-			userId: "",
-			orgId: "",
-			sessionClaims: {
-				__raw: "",
-				sub: "",
-				iss: "https://clerk.com",
-				sid: "",
-				nbf: 0,
-				exp: 0,
-				iat: 0,
-				roles: [],
-			},
-		});
+		this.authObject = {
+			userId: null,
+			orgId: null,
+			sessionClaims: null,
+			sessionId: null,
+			actor: null,
+			orgRole: null,
+			orgSlug: null,
+			orgPermissions: null,
+			factorVerificationAge: null,
+			getToken: async () => "",
+			has: () => false,
+			debug: () => ({}),
+		};
 		return this;
 	}
 
