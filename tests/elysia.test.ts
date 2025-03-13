@@ -4,11 +4,11 @@ import { describe, expect, it, beforeEach, mock } from "bun:test";
 import { Elysia } from "elysia";
 import { clerkPlugin } from "elysia-clerk";
 import { treaty } from "@elysiajs/eden";
-import { clerkMocker } from "../index";
+import { clerkMock } from "../index";
 
 mock.module("elysia-clerk", () => {
 	return {
-		clerkPlugin: clerkMocker.plugin,
+		clerkPlugin: clerkMock.plugin,
 	};
 });
 
@@ -20,7 +20,7 @@ beforeEach(() => {
 describe("Elysia Clerk Mock Tests", () => {
 	it("should allow authenticated requests with custom user", async () => {
 		// Set custom user data
-		clerkMocker.setUser({
+		clerkMock.setUser({
 			userId: "user_456",
 			orgId: "org_789",
 			sessionClaims: {
@@ -54,7 +54,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should authenticate as admin user", async () => {
 		// Set it as admin
-		clerkMocker.mockAdmin();
+		clerkMock.mockAdmin();
 
 		// Create an API that returns the auth object
 		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
@@ -76,7 +76,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should authenticate as regular user", async () => {
 		// Set it as a regular user
-		clerkMocker.mockUser();
+		clerkMock.mockUser();
 
 		// Create an API that returns the auth object
 		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
@@ -98,7 +98,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should fail for unauthenticated requests", async () => {
 		// Set it as unauthenticated
-		clerkMocker.mockUnauthenticated();
+		clerkMock.mockUnauthenticated();
 
 		// Create an API with auth
 		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
@@ -132,7 +132,7 @@ describe("Elysia Clerk Mock Tests", () => {
 	// New tests start here
 	it("should allow custom roles in sessionClaims", async () => {
 		// Set custom roles
-		clerkMocker.setUser({
+		clerkMock.setUser({
 			userId: "user_custom_roles",
 			orgId: "org_custom",
 			sessionClaims: {
@@ -177,7 +177,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should work with admin user custom properties", async () => {
 		// Set admin with custom properties
-		clerkMocker.mockAdmin({
+		clerkMock.mockAdmin({
 			orgSlug: "admin-org",
 			orgRole: "super-admin",
 			orgPermissions: ["manage:all", "read:all"],
@@ -202,7 +202,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should work with regular user custom properties", async () => {
 		// Set regular user with custom properties
-		clerkMocker.mockUser({
+		clerkMock.mockUser({
 			orgSlug: "member-org",
 			orgRole: "basic-member",
 			orgPermissions: ["read:own"],
@@ -227,7 +227,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should protect routes based on auth status", async () => {
 		// Mock an authenticated user
-		clerkMocker.mockUser();
+		clerkMock.mockUser();
 
 		// Create an app with protected and public routes
 		const app = new Elysia()
@@ -261,7 +261,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should handle different HTTP methods with auth", async () => {
 		// Create minimal test for HTTP methods
-		clerkMocker.mockUser(); // Reset to known state
+		clerkMock.mockUser(); // Reset to known state
 
 		const app = new Elysia()
 			.use(clerkPlugin())
@@ -293,7 +293,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		const sessionStartTime = Math.floor(Date.now() / 1000) - 3600; // 1 hour ago
 		const sessionExpiry = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
 
-		clerkMocker.setUser({
+		clerkMock.setUser({
 			userId: "user_session",
 			sessionId: "sess_custom_details",
 			sessionClaims: {
@@ -324,7 +324,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should maintain auth state through chained calls", async () => {
 		// Set initial state
-		clerkMocker.mockAdmin();
+		clerkMock.mockAdmin();
 
 		// Create an API that returns the auth object
 		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
@@ -339,7 +339,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		expect(adminResponse.data?.userId).toBe("user_admin");
 
 		// Change to regular user
-		clerkMocker.mockUser();
+		clerkMock.mockUser();
 
 		// Second request should be regular user
 		const userResponse = await client.index.get({
@@ -349,7 +349,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		expect(userResponse.data?.userId).toBe("user_regular");
 
 		// Change to unauthenticated
-		clerkMocker.mockUnauthenticated();
+		clerkMock.mockUnauthenticated();
 
 		// Third request should fail authentication
 		const unauthResponse = await client.index.get({
@@ -362,7 +362,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should properly integrate with middleware", async () => {
 		// Create a much simpler test
-		clerkMocker.mockUser(); // Start with default user
+		clerkMock.mockUser(); // Start with default user
 
 		// Define a simple app with middleware
 		const app = new Elysia()
@@ -390,7 +390,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should handle complex permission checks", async () => {
 		// Simplify to just test read permission
-		clerkMocker.mockUser({
+		clerkMock.mockUser({
 			orgPermissions: ["read:data"], // Set specific permission
 		});
 
@@ -415,7 +415,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should support organization and user switching", async () => {
 		// Set up user in first organization
-		clerkMocker.setUser({
+		clerkMock.setUser({
 			userId: "multi_org_user",
 			orgId: "org_first",
 			orgRole: "admin",
@@ -449,7 +449,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		expect(firstOrgResponse.data?.orgSlug).toBe("first-org");
 
 		// Switch to second organization
-		clerkMocker.setUser({
+		clerkMock.setUser({
 			userId: "multi_org_user", // Same user
 			orgId: "org_second", // Different org
 			orgRole: "member",
@@ -478,7 +478,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should handle actor impersonation", async () => {
 		// Set up a user with an actor (impersonation)
-		clerkMocker.setUser({
+		clerkMock.setUser({
 			userId: "impersonated_user",
 			orgId: "impersonated_org",
 			sessionClaims: {

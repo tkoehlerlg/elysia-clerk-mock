@@ -9,7 +9,7 @@ import type { SignedInAuthObject } from "@clerk/backend/internal";
 /**
  * Class that handles Clerk authentication mocking
  */
-class ElysiaClerkMocker {
+class ElysiaClerkMock {
 	private authObject: AuthObject;
 
 	constructor(initialUser?: Partial<SignedInAuthObject>) {
@@ -172,6 +172,6 @@ class ElysiaClerkMocker {
 	};
 }
 
-const clerkMocker = new ElysiaClerkMocker();
+const clerkMock = new ElysiaClerkMock();
 
-export { ElysiaClerkMocker, clerkMocker };
+export { ElysiaClerkMock, clerkMock };

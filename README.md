@@ -26,7 +26,7 @@ bun add -d elysia-clerk-mock elysia-clerk
 ## Basic Usage
 
 ```typescript
-import { clerkMocker } from "elysia-clerk-mock";
+import { clerkMock } from "elysia-clerk-mock";
 import { Elysia } from "elysia";
 import { clerkPlugin } from "elysia-clerk";
 
@@ -36,12 +36,12 @@ import { mock } from "bun:test";
 
 mock.module("elysia-clerk", () => {
   return {
-    clerkPlugin: clerkMocker.plugin,
+    clerkPlugin: clerkMock.plugin,
   };
 });
 
 // Configure the mock user as needed
-clerkMocker.mockAdmin();
+clerkMock.mockAdmin();
 
 // Create your Elysia app with the mocked clerk plugin
 const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => {
@@ -69,7 +69,7 @@ import { describe, expect, it, mock } from "bun:test";
 import { Elysia } from "elysia";
 import { clerkPlugin } from "elysia-clerk";
 import { treaty } from "@elysiajs/eden";
-import { clerkMocker } from "elysia-clerk-mock";
+import { clerkMock } from "elysia-clerk-mock";
 
 describe("API Authentication Tests", () => {
   beforeEach(() => {
@@ -79,14 +79,14 @@ describe("API Authentication Tests", () => {
     // Mock the elysia-clerk module
     mock.module("elysia-clerk", () => {
       return {
-        clerkPlugin: clerkMocker.plugin,
+        clerkPlugin: clerkMock.plugin,
       };
     });
   });
 
   it("should authenticate as admin user", async () => {
     // Set it as admin
-    clerkMocker.mockAdmin();
+    clerkMock.mockAdmin();
 
     // Create an API that returns the auth object
     const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
@@ -109,44 +109,44 @@ describe("API Authentication Tests", () => {
 
 ## Available Methods
 
-### `clerkMocker.mockAdmin(customProps?)`
+### `clerkMock.mockAdmin(customProps?)`
 
 Set the mock user to an admin user with predefined values and optional custom properties.
 
 ```typescript
-clerkMocker.mockAdmin({
+clerkMock.mockAdmin({
   orgSlug: "admin-org",
   orgRole: "super-admin",
   orgPermissions: ["manage:all", "read:all"],
 });
 ```
 
-### `clerkMocker.mockUser(customProps?)`
+### `clerkMock.mockUser(customProps?)`
 
 Set the mock user to a regular user with predefined values and optional custom properties.
 
 ```typescript
-clerkMocker.mockUser({
+clerkMock.mockUser({
   orgSlug: "member-org",
   orgRole: "basic-member",
   orgPermissions: ["read:own"],
 });
 ```
 
-### `clerkMocker.mockUnauthenticated()`
+### `clerkMock.mockUnauthenticated()`
 
 Set the mock user to an unauthenticated state.
 
 ```typescript
-clerkMocker.mockUnauthenticated();
+clerkMock.mockUnauthenticated();
 ```
 
-### `clerkMocker.setUser(userData)`
+### `clerkMock.setUser(userData)`
 
 Set custom user data with full control over all properties.
 
 ```typescript
-clerkMocker.setUser({
+clerkMock.setUser({
   userId: "custom_user_123",
   orgId: "custom_org_456",
   sessionClaims: {
@@ -163,16 +163,16 @@ clerkMocker.setUser({
 });
 ```
 
-### `clerkMocker.getUser()`
+### `clerkMock.getUser()`
 
 Get the current mock user data.
 
 ```typescript
-const currentUser = clerkMocker.getUser();
+const currentUser = clerkMock.getUser();
 console.log(currentUser.userId);
 ```
 
-### `clerkMocker.plugin()`
+### `clerkMock.plugin()`
 
 Create an Elysia plugin that mocks Clerk authentication. This is used internally when you mock the clerkPlugin.
 
@@ -180,7 +180,7 @@ Create an Elysia plugin that mocks Clerk authentication. This is used internally
 // This is what happens behind the scenes when you mock clerkPlugin
 mock.module("elysia-clerk", () => {
   return {
-    clerkPlugin: clerkMocker.plugin,
+    clerkPlugin: clerkMock.plugin,
   };
 });
 
