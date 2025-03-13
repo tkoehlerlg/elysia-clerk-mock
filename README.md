@@ -10,17 +10,17 @@ This package provides a simple way to mock the Clerk authentication service for 
 
 ## Features
 
--   🔑 Mock different authentication states (admin, regular user, unauthenticated)
--   🔄 Set custom user data, roles, and permissions
--   🧪 Easy integration with test frameworks
--   🚀 Support for organization context and claims
--   👤 Support for user impersonation via the actor property
+- 🔑 Mock different authentication states (admin, regular user, unauthenticated)
+- 🔄 Set custom user data, roles, and permissions
+- 🧪 Easy integration with test frameworks
+- 🚀 Support for organization context and claims
+- 👤 Support for user impersonation via the actor property
 
 ## Installation
 
 ```bash
 # Install the package and its peer dependencies
-bun add -d elysia-clerk-mock elysia-clerk @elysiajs/eden
+bun add -d elysia-clerk-mock elysia-clerk
 ```
 
 ## Basic Usage
@@ -28,32 +28,33 @@ bun add -d elysia-clerk-mock elysia-clerk @elysiajs/eden
 ```typescript
 import { clerkMocker } from "elysia-clerk-mock";
 import { Elysia } from "elysia";
+import { clerkPlugin } from "elysia-clerk";
 
 // Mock the clerk plugin in your tests
 // For example with bun:test's mock facility:
 import { mock } from "bun:test";
 
 mock.module("elysia-clerk", () => {
-	return {
-		clerkPlugin: clerkMocker.plugin,
-	};
+  return {
+    clerkPlugin: clerkMocker.plugin,
+  };
 });
 
 // Configure the mock user as needed
 clerkMocker.mockAdmin();
 
 // Create your Elysia app with the mocked clerk plugin
-const app = new Elysia().use(clerkMocker.plugin()).get("/", ({ auth }) => {
-	return { message: `Hello, ${auth.userId}!` };
+const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => {
+  return { message: `Hello, ${auth?.userId}!` };
 });
 
 // Make a request
 const response = await app.handle(
-	new Request("http://localhost/", {
-		headers: {
-			Authorization: "Bearer valid-token",
-		},
-	})
+  new Request("http://localhost/", {
+    headers: {
+      Authorization: "Bearer valid-token",
+    },
+  })
 );
 const data = await response.json();
 console.log(data); // { message: "Hello, user_admin!" }
@@ -66,44 +67,43 @@ Treaty is a great tool for testing Elysia apps. Here's how to use it with elysia
 ```typescript
 import { describe, expect, it, mock } from "bun:test";
 import { Elysia } from "elysia";
+import { clerkPlugin } from "elysia-clerk";
 import { treaty } from "@elysiajs/eden";
 import { clerkMocker } from "elysia-clerk-mock";
 
 describe("API Authentication Tests", () => {
-	beforeEach(() => {
-		// Reset mocks before each test
-		mock.restore();
+  beforeEach(() => {
+    // Reset mocks before each test
+    mock.restore();
 
-		// Mock the elysia-clerk module
-		mock.module("elysia-clerk", () => {
-			return {
-				clerkPlugin: clerkMocker.plugin,
-			};
-		});
-	});
+    // Mock the elysia-clerk module
+    mock.module("elysia-clerk", () => {
+      return {
+        clerkPlugin: clerkMocker.plugin,
+      };
+    });
+  });
 
-	it("should authenticate as admin user", async () => {
-		// Set it as admin
-		clerkMocker.mockAdmin();
+  it("should authenticate as admin user", async () => {
+    // Set it as admin
+    clerkMocker.mockAdmin();
 
-		// Create an API that returns the auth object
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+    // Create an API that returns the auth object
+    const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
-		const client = treaty(app);
+    const client = treaty(app);
 
-		// Make a request with the mock admin auth
-		const response = await client.index.get({
-			headers: {
-				Authorization: "Bearer valid-token",
-			},
-		});
+    // Make a request with the mock admin auth
+    const response = await client.index.get({
+      headers: {
+        Authorization: "Bearer valid-token",
+      },
+    });
 
-		expect(response.status).toBe(200);
-		expect(response.data?.userId).toBe("user_admin");
-		expect(response.data?.sessionClaims?.roles).toContain("org:admin");
-	});
+    expect(response.status).toBe(200);
+    expect(response.data?.userId).toBe("user_admin");
+    expect(response.data?.sessionClaims?.roles).toContain("org:admin");
+  });
 });
 ```
 
@@ -115,9 +115,9 @@ Set the mock user to an admin user with predefined values and optional custom pr
 
 ```typescript
 clerkMocker.mockAdmin({
-	orgSlug: "admin-org",
-	orgRole: "super-admin",
-	orgPermissions: ["manage:all", "read:all"],
+  orgSlug: "admin-org",
+  orgRole: "super-admin",
+  orgPermissions: ["manage:all", "read:all"],
 });
 ```
 
@@ -127,9 +127,9 @@ Set the mock user to a regular user with predefined values and optional custom p
 
 ```typescript
 clerkMocker.mockUser({
-	orgSlug: "member-org",
-	orgRole: "basic-member",
-	orgPermissions: ["read:own"],
+  orgSlug: "member-org",
+  orgRole: "basic-member",
+  orgPermissions: ["read:own"],
 });
 ```
 
@@ -147,19 +147,19 @@ Set custom user data with full control over all properties.
 
 ```typescript
 clerkMocker.setUser({
-	userId: "custom_user_123",
-	orgId: "custom_org_456",
-	sessionClaims: {
-		__raw: "",
-		sub: "custom_user_123",
-		iss: "https://clerk.com",
-		sid: "sess_custom",
-		nbf: 0,
-		exp: 0,
-		iat: 0,
-		roles: ["custom:role1", "custom:role2"],
-	},
-	orgPermissions: ["custom:permission1", "custom:permission2"],
+  userId: "custom_user_123",
+  orgId: "custom_org_456",
+  sessionClaims: {
+    __raw: "",
+    sub: "custom_user_123",
+    iss: "https://clerk.com",
+    sid: "sess_custom",
+    nbf: 0,
+    exp: 0,
+    iat: 0,
+    roles: ["custom:role1", "custom:role2"],
+  },
+  orgPermissions: ["custom:permission1", "custom:permission2"],
 });
 ```
 
@@ -172,51 +172,56 @@ const currentUser = clerkMocker.getUser();
 console.log(currentUser.userId);
 ```
 
-### `clerkMocker.plugin(options?)`
+### `clerkMocker.plugin()`
 
-Create an Elysia plugin that mocks Clerk authentication.
+Create an Elysia plugin that mocks Clerk authentication. This is used internally when you mock the clerkPlugin.
 
 ```typescript
-const app = new Elysia().use(clerkMocker.plugin()).get("/", ({ auth }) => auth);
+// This is what happens behind the scenes when you mock clerkPlugin
+mock.module("elysia-clerk", () => {
+  return {
+    clerkPlugin: clerkMocker.plugin,
+  };
+});
+
+// Then use clerkPlugin as normal
+const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 ```
 
 ## Important Testing Notes
 
 1. **Always include Authorization header with valid token**:
 
-    ```typescript
-    const response = await client.endpoint.get({
-    	headers: { Authorization: "Bearer valid-token" },
-    });
-    ```
+```typescript
+const response = await client.endpoint.get({
+  headers: { Authorization: "Bearer valid-token" },
+});
+```
 
-2. **For routes with hyphenated names, use bracket notation**:
+or
 
-    ```typescript
-    const response = await client["user-profile"].get({
-    	headers: { Authorization: "Bearer valid-token" },
-    });
-    ```
+```typescript
+const api = treaty(app, {
+    headers: {
+        Authorization: `Bearer valid-token`,
+		...
+	},
+});
+```
 
-3. **For dynamic routes (with parameters), use treaty's param handling**:
+2. **Reset auth state between tests to avoid interference**:
 
-    ```typescript
-    const response = await client.items({ id: "123" }).get({
-    	headers: { Authorization: "Bearer valid-token" },
-    });
-    ```
+```typescript
+import { mock } from "bun:test";
 
-4. **Reset auth state between tests to avoid interference**:
+beforeEach(() => {
+  mock.restore(); // Reset to a known state
+});
+```
 
-    ```typescript
-    beforeEach(() => {
-    	clerkMocker.mockUser(); // Reset to a known state
-    });
-    ```
-
-5. **Special tokens for testing error scenarios**:
-    - `Bearer invalid-token` - Will return 401 unauthorized
-    - `Bearer expired-token` - Will return 401 with expired token message
+3. **Special tokens for testing error scenarios**:
+   - `Bearer invalid-token` - Will return 401 unauthorized
+   - `Bearer expired-token` - Will return 401 with expired token message
 
 ## License
 
