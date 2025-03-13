@@ -95,7 +95,7 @@ class ElysiaClerkMock {
 			},
 			...customProps,
 		});
-		return this;
+		return { ...this.authObject };
 	}
 
 	/**
@@ -118,7 +118,7 @@ class ElysiaClerkMock {
 			},
 			...customProps,
 		});
-		return this;
+		return { ...this.authObject };
 	}
 
 	/**
@@ -139,7 +139,7 @@ class ElysiaClerkMock {
 			has: () => false,
 			debug: () => ({}),
 		};
-		return this;
+		return { ...this.authObject };
 	}
 
 	/**
@@ -151,7 +151,7 @@ class ElysiaClerkMock {
 			...this.authObject,
 			...userData,
 		} as AuthObject;
-		return this;
+		return { ...this.authObject };
 	}
 
 	/**
