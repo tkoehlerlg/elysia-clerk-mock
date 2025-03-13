@@ -6,19 +6,18 @@ import { clerkPlugin } from "elysia-clerk";
 import { treaty } from "@elysiajs/eden";
 import { clerkMocker } from "../index";
 
+mock.module("elysia-clerk", () => {
+	return {
+		clerkPlugin: clerkMocker.plugin,
+	};
+});
+
+beforeEach(() => {
+	// Reset mocks before each test
+	mock.restore();
+});
+
 describe("Elysia Clerk Mock Tests", () => {
-	beforeEach(() => {
-		// Reset mocks before each test
-		mock.restore();
-
-		// Mock the elysia-clerk module
-		mock.module("elysia-clerk", () => {
-			return {
-				clerkPlugin: clerkMocker.plugin,
-			};
-		});
-	});
-
 	it("should allow authenticated requests with custom user", async () => {
 		// Set custom user data
 		clerkMocker.setUser({
