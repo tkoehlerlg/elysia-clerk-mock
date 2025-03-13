@@ -14,7 +14,7 @@ mock.module("elysia-clerk", () => {
 
 beforeEach(() => {
 	// Reset mocks before each test
-	mock.restore();
+	clerkMock.reset();
 });
 
 describe("Elysia Clerk Mock Tests", () => {
@@ -558,5 +558,81 @@ describe("Elysia Clerk Mock Tests", () => {
 		expect(response.data?.userId).toBe("impersonated_user");
 		expect(response.data?.actorId).toBe("admin_user");
 		expect(response.data?.isImpersonated).toBe(true);
+	});
+
+	it("should correctly restore between different user states", async () => {
+		// Create a simple app that returns the auth object
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
+		const client = treaty(app);
+		const headers = { Authorization: "Bearer valid-token" };
+
+		// Start with admin user
+		clerkMock.mockAdmin();
+		const adminResponse = await client.index.get({ headers });
+		expect(adminResponse.data?.userId).toBe("user_admin");
+		expect(adminResponse.data?.orgRole).toBe("org:admin");
+
+		// Change to regular user
+		clerkMock.mockUser();
+		const userResponse = await client.index.get({ headers });
+		expect(userResponse.data?.userId).toBe("user_regular");
+		expect(userResponse.data?.orgRole).toBe("org:member");
+
+		// Change to unauthenticated (should use invalid token to trigger 401)
+		clerkMock.mockUnauthenticated();
+		const unauthResponse = await client.index.get({
+			headers: { Authorization: "Bearer invalid-token" },
+		});
+		expect(unauthResponse.status).toBe(401);
+
+		// Restore back to admin
+		clerkMock.mockAdmin();
+		const restoredAdminResponse = await client.index.get({ headers });
+		expect(restoredAdminResponse.data?.userId).toBe("user_admin");
+		expect(restoredAdminResponse.data?.orgRole).toBe("org:admin");
+
+		// Verify custom properties are maintained when restoring with setUser
+		clerkMock.setUser({
+			userId: "custom_restored_user",
+			orgId: "custom_org",
+			orgRole: "custom:role",
+		});
+		const customResponse = await client.index.get({ headers });
+		expect(customResponse.data?.userId).toBe("custom_restored_user");
+		expect(customResponse.data?.orgRole).toBe("custom:role");
+	});
+
+	it("should restore auth state when reset() is called", async () => {
+		// Create a simple app that returns the auth object
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
+		const client = treaty(app);
+		const headers = { Authorization: "Bearer valid-token" };
+
+		// Start with admin user with custom properties
+		clerkMock.mockAdmin({
+			orgPermissions: ["custom:permission"],
+			orgSlug: "admin-custom-slug",
+		});
+
+		// Verify admin state is set
+		const adminResponse = await client.index.get({ headers });
+		expect(adminResponse.data?.userId).toBe("user_admin");
+		expect(adminResponse.data?.orgRole).toBe("org:admin");
+		expect(adminResponse.data?.orgPermissions).toContain("custom:permission");
+
+		// Call reset() to reset to default state
+		clerkMock.reset();
+
+		// After reset(), the state should be reset to default
+		const resetResponse = await client.index.get({ headers });
+
+		// Check if we're back to default rather than admin state
+		expect(resetResponse.data?.userId).toBe("user_default");
+		expect(resetResponse.data?.orgId).toBe("org_default");
+		expect(resetResponse.data?.orgRole).toBe("org:member");
+
+		// Ensure custom properties are gone
+		expect(resetResponse.data?.orgPermissions).toBeUndefined();
+		expect(resetResponse.data?.orgSlug).toBeUndefined();
 	});
 });

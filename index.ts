@@ -6,37 +6,43 @@ import { Elysia } from "elysia";
 import type { AuthObject } from "@clerk/backend";
 import type { SignedInAuthObject } from "@clerk/backend/internal";
 
+const DEFAULT_AUTH_OBJECT: AuthObject = {
+	userId: "user_default",
+	orgId: "org_default",
+	sessionClaims: {
+		__raw: "",
+		sub: "user_default",
+		iss: "https://clerk.com",
+		sid: "sess_default",
+		nbf: 0,
+		exp: 0,
+		iat: 0,
+	},
+	sessionId: "sess_default",
+	actor: undefined,
+	orgRole: "org:member",
+	orgSlug: undefined,
+	orgPermissions: undefined,
+	factorVerificationAge: null,
+	getToken: async () => "",
+	has: () => false,
+	debug: () => ({}),
+};
+
 /**
  * Class that handles Clerk authentication mocking
  */
 class ElysiaClerkMock {
 	private authObject: AuthObject;
+	private defaultAuthObject: AuthObject;
 
 	constructor(initialUser?: Partial<SignedInAuthObject>) {
 		// Default user values
 		this.authObject = {
-			userId: "user_default",
-			orgId: "org_default",
-			sessionClaims: {
-				__raw: "",
-				sub: "user_default",
-				iss: "https://clerk.com",
-				sid: "sess_default",
-				nbf: 0,
-				exp: 0,
-				iat: 0,
-			},
-			sessionId: "sess_default",
-			actor: undefined,
-			orgRole: undefined,
-			orgSlug: undefined,
-			orgPermissions: undefined,
-			factorVerificationAge: null,
-			getToken: async () => "",
-			has: () => false,
-			debug: () => ({}),
+			...DEFAULT_AUTH_OBJECT,
 			...initialUser,
-		};
+		} as AuthObject;
+		this.defaultAuthObject = { ...this.authObject };
 	}
 
 	/**
@@ -115,7 +121,6 @@ class ElysiaClerkMock {
 			...this.authObject,
 			...userData,
 		} as AuthObject;
-
 		return this;
 	}
 
@@ -127,11 +132,18 @@ class ElysiaClerkMock {
 	}
 
 	/**
+	 * Reset the mock user to the default state
+	 */
+	reset() {
+		this.authObject = { ...this.defaultAuthObject };
+	}
+
+	/**
 	 * Create a mock Clerk client
 	 */
 	private get mockClerkClient() {
 		return {
-			authenticateRequest: (request: Request) => ({
+			authenticateRequest: (_request: Request) => ({
 				toAuth: () => ({
 					userId: this.authObject.userId,
 					orgId: this.authObject.orgId,

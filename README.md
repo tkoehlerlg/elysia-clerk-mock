@@ -15,6 +15,7 @@ This package provides a simple way to mock the Clerk authentication service for 
 - 🧪 Easy integration with test frameworks
 - 🚀 Support for organization context and claims
 - 👤 Support for user impersonation via the actor property
+- 🔁 Proper state management between tests
 
 ## Installation
 
@@ -32,7 +33,6 @@ import { Elysia } from "elysia";
 import { clerkPlugin } from "elysia-clerk";
 
 // Mock the clerk plugin in your tests
-
 mock.module("elysia-clerk", () => {
   return {
     clerkPlugin: clerkMock.plugin,
@@ -72,8 +72,8 @@ import { clerkMock } from "elysia-clerk-mock";
 
 describe("API Authentication Tests", () => {
   beforeEach(() => {
-    // Reset mocks before each test
-    mock.restore();
+    // Reset clerk mock state before each test
+    clerkMock.reset();
 
     // Mock the elysia-clerk module
     mock.module("elysia-clerk", () => {
@@ -101,6 +101,7 @@ describe("API Authentication Tests", () => {
 
     expect(response.status).toBe(200);
     expect(response.data?.userId).toBe("user_admin");
+    expect(response.data?.orgRole).toBe("org:admin");
     expect(response.data?.sessionClaims?.roles).toContain("org:admin");
   });
 });
@@ -110,31 +111,33 @@ describe("API Authentication Tests", () => {
 
 ### `clerkMock.mockAdmin(customProps?)`
 
-Set the mock user to an admin user with predefined values and optional custom properties.
+Set the mock user to an admin user with predefined values and optional custom properties. By default, this sets the `orgRole` to "org:admin".
 
 ```typescript
 clerkMock.mockAdmin({
   orgSlug: "admin-org",
-  orgRole: "super-admin",
+  // You can override the default orgRole if needed
+  orgRole: "custom:admin-role",
   orgPermissions: ["manage:all", "read:all"],
 });
 ```
 
 ### `clerkMock.mockUser(customProps?)`
 
-Set the mock user to a regular user with predefined values and optional custom properties.
+Set the mock user to a regular user with predefined values and optional custom properties. By default, this sets the `orgRole` to "org:member".
 
 ```typescript
 clerkMock.mockUser({
   orgSlug: "member-org",
-  orgRole: "basic-member",
+  // You can override the default orgRole if needed
+  orgRole: "custom:member-role",
   orgPermissions: ["read:own"],
 });
 ```
 
 ### `clerkMock.mockUnauthenticated()`
 
-Set the mock user to an unauthenticated state.
+Set the mock user to an unauthenticated state, with all auth properties set to null.
 
 ```typescript
 clerkMock.mockUnauthenticated();
@@ -148,6 +151,7 @@ Set custom user data with full control over all properties.
 clerkMock.setUser({
   userId: "custom_user_123",
   orgId: "custom_org_456",
+  orgRole: "custom:role",
   sessionClaims: {
     __raw: "",
     sub: "custom_user_123",
@@ -169,6 +173,15 @@ Get the current mock user data.
 ```typescript
 const currentUser = clerkMock.getUser();
 console.log(currentUser.userId);
+```
+
+### `clerkMock.reset()`
+
+Reset the mock user to the default state. This is useful for ensuring tests start with a clean state.
+
+```typescript
+// Reset to default state
+clerkMock.reset();
 ```
 
 ### `clerkMock.plugin()`
@@ -211,10 +224,9 @@ const api = treaty(app, {
 2. **Reset auth state between tests to avoid interference**:
 
 ```typescript
-import { mock } from "bun:test";
-
 beforeEach(() => {
-  mock.restore(); // Reset to a known state
+  // Reset to a clean state before each test
+  clerkMock.reset();
 });
 ```
 
