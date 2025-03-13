@@ -26,13 +26,12 @@ bun add -d elysia-clerk-mock elysia-clerk
 ## Basic Usage
 
 ```typescript
+import { mock } from "bun:test";
 import { clerkMock } from "elysia-clerk-mock";
 import { Elysia } from "elysia";
 import { clerkPlugin } from "elysia-clerk";
 
 // Mock the clerk plugin in your tests
-// For example with bun:test's mock facility:
-import { mock } from "bun:test";
 
 mock.module("elysia-clerk", () => {
   return {
