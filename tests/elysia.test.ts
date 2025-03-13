@@ -2,6 +2,7 @@
 
 import { describe, expect, it, beforeEach, mock } from "bun:test";
 import { Elysia } from "elysia";
+import { clerkPlugin } from "elysia-clerk";
 import { treaty } from "@elysiajs/eden";
 import { clerkMocker } from "../index";
 
@@ -13,7 +14,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		// Mock the elysia-clerk module
 		mock.module("elysia-clerk", () => {
 			return {
-				clerkPlugin: () => clerkMocker.plugin(),
+				clerkPlugin: clerkMocker.plugin,
 			};
 		});
 	});
@@ -35,9 +36,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		});
 
 		// Create an API with auth using the clerk plugin
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		// Create a client for testing
 		const client = treaty(app);
@@ -59,9 +58,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		clerkMocker.mockAdmin();
 
 		// Create an API that returns the auth object
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 
@@ -83,9 +80,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		clerkMocker.mockUser();
 
 		// Create an API that returns the auth object
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 
@@ -107,9 +102,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		clerkMocker.mockUnauthenticated();
 
 		// Create an API with auth
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 
@@ -126,9 +119,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 	it("should handle no token provided", async () => {
 		// Create an API with auth
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 
@@ -157,9 +148,7 @@ describe("Elysia Clerk Mock Tests", () => {
 			},
 		});
 
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 		const response = await client.index.get({
@@ -174,9 +163,7 @@ describe("Elysia Clerk Mock Tests", () => {
 	});
 
 	it("should handle expired token correctly", async () => {
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 		const response = await client.index.get({
@@ -197,9 +184,7 @@ describe("Elysia Clerk Mock Tests", () => {
 			orgPermissions: ["manage:all", "read:all"],
 		});
 
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 		const response = await client.index.get({
@@ -224,9 +209,7 @@ describe("Elysia Clerk Mock Tests", () => {
 			orgPermissions: ["read:own"],
 		});
 
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 		const response = await client.index.get({
@@ -249,12 +232,12 @@ describe("Elysia Clerk Mock Tests", () => {
 
 		// Create an app with protected and public routes
 		const app = new Elysia()
-			.use(clerkMocker.plugin())
+			.use(clerkPlugin())
 			.get("/protected", ({ auth }) => {
-				if (!auth.userId) {
+				if (!auth?.userId) {
 					return { status: "unauthorized" };
 				}
-				return { status: "authorized", user: auth.userId };
+				return { status: "authorized", user: auth?.userId };
 			})
 			.get("/public", () => ({ status: "public" }));
 
@@ -282,14 +265,14 @@ describe("Elysia Clerk Mock Tests", () => {
 		clerkMocker.mockUser(); // Reset to known state
 
 		const app = new Elysia()
-			.use(clerkMocker.plugin())
+			.use(clerkPlugin())
 			.get("/api", ({ auth }) => ({
 				method: "GET",
-				user: auth.userId,
+				user: auth?.userId,
 			}))
 			.post("/api", ({ auth }) => ({
 				method: "POST",
-				user: auth.userId,
+				user: auth?.userId,
 			}));
 
 		// Create a client
@@ -326,9 +309,7 @@ describe("Elysia Clerk Mock Tests", () => {
 			},
 		});
 
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 		const response = await client.index.get({
@@ -347,9 +328,7 @@ describe("Elysia Clerk Mock Tests", () => {
 		clerkMocker.mockAdmin();
 
 		// Create an API that returns the auth object
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/", ({ auth }) => auth);
+		const app = new Elysia().use(clerkPlugin()).get("/", ({ auth }) => auth);
 
 		const client = treaty(app);
 
@@ -388,7 +367,7 @@ describe("Elysia Clerk Mock Tests", () => {
 
 		// Define a simple app with middleware
 		const app = new Elysia()
-			.use(clerkMocker.plugin())
+			.use(clerkPlugin())
 			// Just pass through the auth to the handler
 			.get("/protected", ({ auth }) => {
 				const userId = auth?.userId;
@@ -417,15 +396,13 @@ describe("Elysia Clerk Mock Tests", () => {
 		});
 
 		// Create a simple app with permission check
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/data", ({ auth }) => {
-				const canRead = auth.orgPermissions?.includes("read:data");
-				if (!canRead) {
-					return { status: 403, message: "Forbidden" };
-				}
-				return { status: 200, message: "Success" };
-			});
+		const app = new Elysia().use(clerkPlugin()).get("/data", ({ auth }) => {
+			const canRead = auth?.orgPermissions?.includes("read:data");
+			if (!canRead) {
+				return { status: 403, message: "Forbidden" };
+			}
+			return { status: 200, message: "Success" };
+		});
 
 		// Test with client
 		const client = treaty(app);
@@ -455,14 +432,12 @@ describe("Elysia Clerk Mock Tests", () => {
 			},
 		});
 
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/org-info", ({ auth }) => ({
-				userId: auth.userId,
-				orgId: auth.orgId,
-				orgRole: auth.orgRole,
-				orgSlug: auth.orgSlug,
-			}));
+		const app = new Elysia().use(clerkPlugin()).get("/org-info", ({ auth }) => ({
+			userId: auth?.userId,
+			orgId: auth?.orgId,
+			orgRole: auth?.orgRole,
+			orgSlug: auth?.orgSlug,
+		}));
 
 		const client = treaty(app);
 
@@ -522,13 +497,11 @@ describe("Elysia Clerk Mock Tests", () => {
 			},
 		});
 
-		const app = new Elysia()
-			.use(clerkMocker.plugin())
-			.get("/check-actor", ({ auth }) => ({
-				userId: auth.userId,
-				actorId: auth.actor?.sub,
-				isImpersonated: !!auth.actor,
-			}));
+		const app = new Elysia().use(clerkPlugin()).get("/check-actor", ({ auth }) => ({
+			userId: auth?.userId,
+			actorId: auth?.actor?.sub,
+			isImpersonated: !!auth?.actor,
+		}));
 
 		const client = treaty(app);
 
