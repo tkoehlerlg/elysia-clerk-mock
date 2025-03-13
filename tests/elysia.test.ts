@@ -507,13 +507,13 @@ describe("Elysia Clerk Mock Tests", () => {
 		clerkMock.mockAdmin();
 		let authObject = clerkMock.getUser();
 		expect(authObject.orgRole).toBe("org:admin");
-		expect(authObject.sessionClaims.roles).toContain("org:admin");
+		expect(authObject.sessionClaims?.roles).toContain("org:admin");
 
 		// Test regular user
 		clerkMock.mockUser();
 		authObject = clerkMock.getUser();
 		expect(authObject.orgRole).toBe("org:member");
-		expect(authObject.sessionClaims.roles).toContain("org:member");
+		expect(authObject.sessionClaims?.roles).toContain("org:member");
 
 		// Test unauthenticated user
 		clerkMock.mockUnauthenticated();
