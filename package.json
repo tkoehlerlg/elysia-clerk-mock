@@ -1,6 +1,6 @@
 {
 	"name": "elysia-clerk-mock",
-	"version": "1.1.5",
+	"version": "1.1.6",
 	"description": "A lightweight testing utility for mocking Clerk authentication in Elysia.js applications",
 	"module": "dist/index.js",
 	"main": "dist/index.js",
@@ -37,5 +37,13 @@
 		"mock"
 	],
 	"author": "Torben Köhler",
-	"license": "MIT"
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tkoehlerlg/elysia-clerk-mock.git"
+	},
+	"bugs": {
+		"url": "https://github.com/tkoehlerlg/elysia-clerk-mock/issues"
+	},
+	"homepage": "https://github.com/tkoehlerlg/elysia-clerk-mock#readme"
 }
