@@ -1,10 +1,40 @@
 /** @format */
 
 import type { ElysiaClerkOptions } from "elysia-clerk";
-import { AuthStatus } from "@clerk/backend/internal";
 import { Elysia } from "elysia";
 import type { AuthObject } from "@clerk/backend";
-import type { SignedInAuthObject } from "@clerk/backend/internal";
+
+// Create our own AuthStatus enum to avoid internal import
+enum AuthStatus {
+	SignedIn = "signed_in",
+	SignedOut = "signed_out",
+}
+
+// Create our own type definition without using internal imports
+// Use a type alias with a simple structure that matches our needs
+type SignedInAuthObject = {
+	sessionClaims: {
+		__raw: string;
+		sub: string;
+		iss: string;
+		sid: string;
+		nbf: number;
+		exp: number;
+		iat: number;
+		roles?: string[];
+	};
+	sessionId: string;
+	actor: any | undefined;
+	userId: string;
+	orgId: string | undefined;
+	orgRole: string | undefined;
+	orgSlug: string | undefined;
+	orgPermissions: string[] | undefined;
+	factorVerificationAge: [firstFactorAge: number, secondFactorAge: number] | null;
+	getToken: () => Promise<string>;
+	has: (permission: string) => boolean;
+	debug: () => Record<string, any>;
+};
 
 const DEFAULT_AUTH_OBJECT: AuthObject = {
 	userId: "user_default",
