@@ -1,6 +1,6 @@
 {
 	"name": "elysia-clerk-mock",
-	"version": "1.0.1",
+	"version": "1.0.3",
 	"description": "A lightweight testing utility for mocking Clerk authentication in Elysia.js applications",
 	"module": "dist/index.js",
 	"main": "dist/index.js",
@@ -13,11 +13,12 @@
 		"@clerk/backend": "^1.25.2"
 	},
 	"devDependencies": {
-		"bun-types": "^1.2.5",
-		"typescript": "^5.8.2",
 		"@elysiajs/eden": "^1.2.0",
+		"bun-types": "^1.2.5",
 		"elysia": "^1.2.25",
-		"elysia-clerk": "^0.9.6"
+		"elysia-clerk": "^0.9.6",
+		"prettier": "^3.5.3",
+		"typescript": "^5.8.2"
 	},
 	"peerDependencies": {
 		"elysia": ">=1.0.0",
@@ -26,7 +27,7 @@
 	"scripts": {
 		"build": "tsc && bun build ./index.ts --outdir ./dist --target bun",
 		"test": "bun test",
-		"prepublishOnly": "bun run build"
+		"format": "prettier --write \"**/*.{ts,js,md,json}\""
 	},
 	"keywords": [
 		"bun",
