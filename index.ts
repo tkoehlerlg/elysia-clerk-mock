@@ -136,10 +136,7 @@ class ElysiaClerkMocker {
 					isAuthenticated: this.authObject.userId !== null,
 				}),
 				headers: new Headers(),
-				status:
-					this.authObject.userId !== null
-						? AuthStatus.SignedIn
-						: AuthStatus.SignedOut,
+				status: this.authObject.userId !== null ? AuthStatus.SignedIn : AuthStatus.SignedOut,
 			}),
 		};
 	}
